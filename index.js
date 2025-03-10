@@ -1,32 +1,24 @@
-const express = require("express");
+const express = require('express');
+const mongoose = require('mongoose');
+require('dotenv').config();
 const app = express();
-
-app.get("/", (req, res) => {
-  res.json({ message: "Hello World" });
-});
-
-const PORT = 3000;
-app.get("/file", (req, res) => {
-  res.sendFile(__dirname + "/public/index.html");
-});
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); 
 
-app.post("/api/todos/create", (req, res) => {
-  const todos = [{ Id: 1, title: "titre" }];
-  todos.push(req.body);
-  res.send(todos);
+const userRoutes = require('./routes/user.routes');
+const authRoutes = require('./routes/auth.routes');
+app.use('/api/auth/user', userRoutes);
+app.use('/api/auth', authRoutes);
+
+mongoose.connect(process.env.MONGO_URI).then(() => {
+    console.log('Connexion à MongoDB réussie !');
+}).catch(() => {
+    console.log('Connexion à MongoDB échouée !');
+});
+
+const port = 3000;
+app.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
 });
 
 
-const todos = [{ id: 1, title: "titre" }, { id: 2, title: "titre" }];
-app.put("/api/todos/update/:id", (req, res) => {
-  const id = req.params.id;
-  todos.map((todo) => {
-    todo.id === id ? { ...todo, ...req.body } : todo
-  })
-  res.send(todos)
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-});
